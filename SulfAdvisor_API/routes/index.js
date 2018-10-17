@@ -1,9 +1,8 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
+//	collection 관련
+const collection = require( './collection/index' ) ;
+router.use( '/collection' , collection ) ;
 
 module.exports = router;
