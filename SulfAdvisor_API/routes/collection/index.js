@@ -5,8 +5,8 @@ var router = express.Router();
 const cityList = require( './cityList' ) ;
 router.use( '/cityList' , cityList ) ;
 
-//	searchGrade
-const searchGrade = require( './searchGrade' ) ;
-router.use( '/searchGrade' , searchGrade ) ;
+//	search
+const search = require( './search/index' ) ;
+router.use( '/search' , search ) ;
 
 module.exports = router;
