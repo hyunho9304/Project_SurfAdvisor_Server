@@ -75,7 +75,7 @@ router.get( '/' , function( req , res ) {
 						if( distanceData.unit === 'Km' )
 							tmpDistance = Number(distanceData.distance ) * 1000 ;
 
-						if( tmpDistance <= 100000 ) {
+						if( tmpDistance > 0 ) {
 
 							let data = {
 								ss_photo : result[i].ss_photo ,
