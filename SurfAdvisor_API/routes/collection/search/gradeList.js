@@ -1,5 +1,5 @@
 /*
-	URL : /collection/searchGrade
+	URL : /collection/search/gradeList
 	Description : 검색결과( 등급순 )
 	Content-type : x-www-form-urlencoded
 	method : GET - query

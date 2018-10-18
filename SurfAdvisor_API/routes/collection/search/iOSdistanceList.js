@@ -1,9 +1,9 @@
 /*
-	URL : /collection/search/distanceList
+	URL : /collection/search/iOSdistanceList
 	Description : 검색결과( 거리순 )
 	Content-type : x-www-form-urlencoded
 	method : GET - query
-	query = /?si_date={선택날짜}&name={선택도시이름}
+	query = /?si_date={선택날짜}&longitude={경도}&latitude={위도}
 */
 
 const express = require('express');
@@ -16,7 +16,8 @@ const moment = require( 'moment' ) ;
 router.get( '/' , function( req , res ) {
 
 	let si_date = req.query.si_date ;
-	let c_name = req.query.c_name ;
+	let longitude = req.query.longitude ;
+	let latitude = req.query.latitude ;
 
 	let task = [
 
@@ -34,25 +35,7 @@ router.get( '/' , function( req , res ) {
 			});
 		} ,
 
-		function( connection , callback ) { 
-
-			let selectCoordinatesQuery = 'SELECT * FROM City WHERE c_name = ?' ;
-
-			connection.query( selectCoordinatesQuery , c_name , function(err , result) {
-				if( err ) {
-					res.status(500).send({
-						status : "fail" ,
-						message : "internal server err"
-					}) ;
-					connection.release() ;
-					callback( "selectCoordinatesQuery err") ;
-				} else {
-					callback( null , connection , result[0].c_longitude , result[0].c_latitude ) ;
-				}
-			}) ;
-		} ,
-
-		function( connection , longitude , latitude , callback ) {
+		function( connection , callback ) {
 
 			let selectSearchDistanceQuery = 'SELECT * FROM SurfArea SA , SurfInfo SI WHERE SA.sa_id = SI.sa_id AND SI.si_date = ?' ;
 
