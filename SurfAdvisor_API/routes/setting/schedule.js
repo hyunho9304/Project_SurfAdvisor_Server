@@ -73,33 +73,27 @@ router.post('/', function(req, res) {
                     // console.log(result.response.body[0]);
                     // console.log();
 
-                    for(var i = 0 ; i < result.response.body[0].items[0].item.length ; i++){
+                    for( var i = 0 ; i < result.response.body[0].items[0].item.length ; i++ ){
+                    	
                     	var title = result.response.body[0].items[0].item[i].title[0] ;
                     	var address = result.response.body[0].items[0].item[i].addr1[0] ;
                     	var phoneNumber = result.response.body[0].items[0].item[i].tel[0] ;
                     	var longitude = result.response.body[0].items[0].item[i].mapx[0] ;
                     	var latitude = result.response.body[0].items[0].item[i].mapy[0] ;
 
-                 		console.log( title );
-                 		console.log( address );
-                 		console.log( phoneNumber );
-                 		console.log( longitude );
-                 		console.log( latitude );
-                 		console.log( "----------------------");
+                 		let insertHotelQuery = 'INSERT INTO Hotel VALUES( ? , ? , ? , ? , ? , ? )' ;
+						let queryArr = [ null , title , phoneNumber , address , longitude , latitude ] ;
 
-      //            		let insertHotelQuery = 'INSERT INTO Hotel VALUES( ? , ? , ? , ? , ? , ? )' ;
-						// let queryArr = [ null , title , phoneNumber , address , longitude , latitude ] ;
-
-						// connection.query( insertSeoulBuskingZoneQuery , queryArr , function( err , result ) {
-						// 	if(err) {
-						// 		res.status(500).send({
-						// 			status : "fail" ,
-						// 			message : "internal server err"
-						// 		}) ;
-						// 		connection.release() ;
-						// 		callback( "insertSeoulBuskingZoneQuery err") ;
-						// 	}
-						// }) ;
+						connection.query( insertHotelQuery , queryArr , function( err , result ) {
+							if(err) {
+								res.status(500).send({
+									status : "fail" ,
+									message : "internal server err"
+								}) ;
+								connection.release() ;
+								callback( "insertHotelQuery err") ;
+							}
+						}) ;
                     }
                 });
                 res.status(201).send({
