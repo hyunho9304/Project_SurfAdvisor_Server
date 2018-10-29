@@ -66,12 +66,10 @@ router.post('/', function(req, res) {
             var parser = new xml2js.Parser();
 
             fs.readFile(__dirname + "/hotel.xml", function(err, data) {
-  
-                // console.log(data);
+
                 parser.parseString(data, function(err, result) {
 
-                    // console.log(result.response.body[0]);
-                    // console.log();
+                	console.log(result.response.body[0].items[0].item.length);
 
                     for( var i = 0 ; i < result.response.body[0].items[0].item.length ; i++ ){
                     	
