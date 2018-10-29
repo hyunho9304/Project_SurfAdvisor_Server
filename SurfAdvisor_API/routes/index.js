@@ -9,4 +9,8 @@ router.use( '/collection' , collection ) ;
 const surfArea = require( './surfArea/index' ) ;
 router.use( '/surfArea' , surfArea ) ;
 
+//	setting 관련
+const setting = require( './setting/index' ) ;
+router.use( '/setting' , setting ) ;
+
 module.exports = router;
