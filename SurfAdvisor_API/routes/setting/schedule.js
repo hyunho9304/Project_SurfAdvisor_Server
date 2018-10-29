@@ -69,8 +69,6 @@ router.post('/', function(req, res) {
 
                 parser.parseString(data, function(err, result) {
 
-                	console.log(result.response.body[0].items[0].item.length);
-
                     for( var i = 0 ; i < result.response.body[0].items[0].item.length ; i++ ){
                     	
                     	var title = result.response.body[0].items[0].item[i].title[0] ;
@@ -79,19 +77,27 @@ router.post('/', function(req, res) {
                     	var longitude = result.response.body[0].items[0].item[i].mapx[0] ;
                     	var latitude = result.response.body[0].items[0].item[i].mapy[0] ;
 
-                 		let insertHotelQuery = 'INSERT INTO Hotel VALUES( ? , ? , ? , ? , ? , ? )' ;
-						let queryArr = [ null , title , phoneNumber , address , longitude , latitude ] ;
+                    	if( result.response.body[0].items[0].item[i].firstimage[0] === undefined )
+                    		console.log("gogo");
+                    	else 
+                    		console.log("haha");
 
-						connection.query( insertHotelQuery , queryArr , function( err , result ) {
-							if(err) {
-								res.status(500).send({
-									status : "fail" ,
-									message : "internal server err"
-								}) ;
-								connection.release() ;
-								callback( "insertHotelQuery err") ;
-							}
-						}) ;
+
+
+
+      //            		let insertHotelQuery = 'INSERT INTO Hotel VALUES( ? , ? , ? , ? , ? , ? )' ;
+						// let queryArr = [ null , title , phoneNumber , address , longitude , latitude ] ;
+
+						// connection.query( insertHotelQuery , queryArr , function( err , result ) {
+						// 	if(err) {
+						// 		res.status(500).send({
+						// 			status : "fail" ,
+						// 			message : "internal server err"
+						// 		}) ;
+						// 		connection.release() ;
+						// 		callback( "insertHotelQuery err") ;
+						// 	}
+						// }) ;
                     }
                 });
                 res.status(201).send({
