@@ -31,7 +31,7 @@ router.post('/', function(req, res) {
             var url = 'http://api.visitkorea.or.kr/openapi/service/rest/KorService/searchStay';
             var queryParams = '?' + encodeURIComponent('ServiceKey') + '=22op4iVErXKCKm1jqNWSpzQ3Mo%2FoQYIIOquxrGwyyNSnC86o21TLuPaQGQ%2BH%2BLRT0hsvTo%2BG7UaPsBrMhmRZOg%3D%3D'; /* Service Key*/
             queryParams += '&' + encodeURIComponent('ServiceKey') + '=' + encodeURIComponent('22op4iVErXKCKm1jqNWSpzQ3Mo%2FoQYIIOquxrGwyyNSnC86o21TLuPaQGQ%2BH%2BLRT0hsvTo%2BG7UaPsBrMhmRZOg%3D%3D'); /* 공공데이터포털에서 발급받은 인증키 */
-            queryParams += '&' + encodeURIComponent('numOfRows') + '=' + encodeURIComponent('10'); /* 한 페이지 결과 수 */
+            queryParams += '&' + encodeURIComponent('numOfRows') + '=' + encodeURIComponent('2872'); /* 한 페이지 결과 수 */
             queryParams += '&' + encodeURIComponent('pageNo') + '=' + encodeURIComponent('1'); /* 현재 페이지 번호 */
             queryParams += '&' + encodeURIComponent('MobileOS') + '=' + encodeURIComponent('ETC'); /* IOS(아이폰),AND(안드로이드),WIN(원도우폰),ETC */
             queryParams += '&' + encodeURIComponent('MobileApp') + '=' + encodeURIComponent('AppTest'); /* 서비스명=어플명 */
@@ -69,24 +69,43 @@ router.post('/', function(req, res) {
 
                 parser.parseString(data, function(err, result) {
 
+                	console.log( result.response.body[0].items[0].item.length );
+
                     for( var i = 0 ; i < result.response.body[0].items[0].item.length ; i++ ){
-                    	
-                    	var title = result.response.body[0].items[0].item[i].title[0] ;
-                    	var address = result.response.body[0].items[0].item[i].addr1[0] ;
-                    	var phoneNumber = result.response.body[0].items[0].item[i].tel[0] ;
-                    	var longitude = result.response.body[0].items[0].item[i].mapx[0] ;
-                    	var latitude = result.response.body[0].items[0].item[i].mapy[0] ;
 
-                    	if( result.response.body[0].items[0].item[i].firstimage[0] === undefined )
-                    		console.log("gogo");
-                    	else 
-                    		console.log("haha");
+                    	var elements = Object.keys( result.response.body[0].items[0].item[i] ) ;
 
+                    	var title = "" ;
+                    	var address = "" ;
+                    	var phoneNumber = "" ;
+                    	var longitude = "" ;
+                    	var latitude = "" ;
+                    	var photo = "" ;
+                    	for( var j = 0 ; j < elements.length ; j++ ) {
+                    		if( elements[j] == 'title' ) {
+                    			title = result.response.body[0].items[0].item[i].title[0] ; continue ;
+                    		}
+                    		else if( elements[j] == 'addr1' ) {
+                    			address = result.response.body[0].items[0].item[i].addr1[0] ; continue ;
+                    		}
+                    		else if( elements[j] == 'tel' ) {
+                    			phoneNumber = result.response.body[0].items[0].item[i].tel[0] ; continue ;
+                    		}
+                    		else if( elements[j] == 'mapx' ) {
+                    			longitude = result.response.body[0].items[0].item[i].mapx[0] ; continue ;
+                    		}
+                    		else if( elements[j] == 'mapy' ) {
+                    			latitude = result.response.body[0].items[0].item[i].mapy[0] ; continue ;
+                    		}
+                    		else if( elements[j] == 'firstimage' ) {
+                    			photo = result.response.body[0].items[0].item[i].firstimage[0] ; continue ;
+                    		}
+                    		else
+                    			continue ;
+                    	}
 
-
-
-      //            		let insertHotelQuery = 'INSERT INTO Hotel VALUES( ? , ? , ? , ? , ? , ? )' ;
-						// let queryArr = [ null , title , phoneNumber , address , longitude , latitude ] ;
+      //            		let insertHotelQuery = 'INSERT INTO Hotel VALUES( ? , ? , ? , ? , ? , ? , ? )' ;
+						// let queryArr = [ null , title , phoneNumber , address , longitude , latitude , photo ] ;
 
 						// connection.query( insertHotelQuery , queryArr , function( err , result ) {
 						// 	if(err) {
