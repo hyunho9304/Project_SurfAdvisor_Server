@@ -90,8 +90,8 @@ router.get( '/' , function( req , res ) {
 				data : {
 					sa_name : object.sa_name ,
 					si_grade : object.si_grade ,
-					si_weatherImage : object.si_weatherImage ,
 					si_temperature : object.si_temperature ,
+					si_maxTemperature : object.si_maxTemperature ,
 					si_wave : object.si_wave ,
 					si_wind : object.si_wind ,
 					forcast : list
