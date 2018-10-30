@@ -35,7 +35,7 @@ router.get( '/' , function( req , res ) {
 
 		function( connection , callback ) { 
 
-			let selectDetailQuery = 'SELECT * FROM SurfInfo SI , SurfArea SA WHERE SI.si_id = SA.sa_id AND SI.si_date = ? AND SI.sa_id = ?' ;
+			let selectDetailQuery = 'SELECT * FROM SurfInfo SI , SurfArea SA WHERE SI.sa_id = SA.sa_id AND SI.si_date = ? AND SI.sa_id = ?' ;
 			let queryArr = [ si_date , sa_id ] ;
 			connection.query( selectDetailQuery , queryArr , function(err , result) {
 				if( err ) {
