@@ -67,18 +67,18 @@ router.get('/', function(req, res) {
 
                     let surfShopList = [];
 
-                    for (var i = 0; i < result.length; i++) {
+                    for (var i = 0; i < result.length ; i++) {
 
                         let distanceData = distance(latitude, longitude, result[i].ss_latitude, result[i].ss_longitude);
 
                         var tmpDistance = Number(distanceData.distance);
                         if (distanceData.unit === 'Km')
-                            tmpDistance = Number(distanceData.distance) * 1000;
+                            tmpDistance = Number(distanceData.distance) * 1000 ;
 
                         if (tmpDistance < 500 ) {
 
                             let data = {
-                                ss_photo: result[i].ss_photo,
+                            	ss_photo: result[i].ss_photo,
                                 ss_name: result[i].ss_name,
                                 ss_site: result[i].ss_site,
                                 ss_introduction: result[i].ss_introduction,
@@ -127,21 +127,27 @@ router.get('/', function(req, res) {
 
                     let restaurantList = [];
 
-                    for (var i = 0; i < 0; i++) {
+                    for (var i = 0; i < result.length ; i++) {
 
                         let distanceData = distance(latitude, longitude, result[i].r_latitude, result[i].r_longitude);
 
-                        let tmpDistance;
+                        var tmpDistance = Number(distanceData.distance) ;
                         if (distanceData.unit === 'Km')
-                            tmpDistance = Number(distanceData.distance) * 1000;
+                            tmpDistance = Number(distanceData.distance) * 1000 ;
 
-                        if (tmpDistance > 0) {
+                        if (tmpDistance < 500 ) {
 
                             let data = {
+                            	r_photo : result[i].r_photo ,
                                 r_name: result[i].r_name,
+                                r_explain1 : result[i].r_explain1 ,
+                                r_explain2 : result[i].r_explain2 ,
+                                r_time : result[i].r_time ,
+                                r_address : result[i].r_address ,
                                 r_longitude: result[i].r_longitude,
                                 r_latitude: result[i].r_latitude,
-                                distance: Number(distanceData.distance),
+                                r_phoneNumber : result[i].r_phoneNumber ,
+                                distance: Number(distanceData.distance) ,
                                 distanceUnit: distanceData.unit
                             }
                             restaurantList.push(data);
@@ -149,7 +155,8 @@ router.get('/', function(req, res) {
                     }
 
                     restaurantList.sort(function(a, b) {
-                        let tmpA, tmpB;
+                        var tmpA = a.distance;
+                        var tmpB = b.distance;
 
                         if (a.distanceUnit === 'Km')
                             tmpA = a.distance * 1000;
@@ -157,7 +164,7 @@ router.get('/', function(req, res) {
                         if (b.distanceUnit === 'Km')
                             tmpB = b.distance * 1000;
 
-                        return tmpA > tmpB
+                        return ( tmpA >= tmpB )? 1 : -1 ;
                     });
                     callback(null, connection, longitude, latitude, surfShopList, restaurantList);
                 }
@@ -180,20 +187,23 @@ router.get('/', function(req, res) {
 
                     let hotelList = [];
 
-                    for (var i = 0; i < 0; i++) {
+                    for (var i = 0; i < result.length ; i++) {
 
                         let distanceData = distance(latitude, longitude, result[i].h_latitude, result[i].h_longitude);
 
-                        let tmpDistance;
+                        let tmpDistance = Number(distanceData.distance) ;
                         if (distanceData.unit === 'Km')
-                            tmpDistance = Number(distanceData.distance) * 1000;
+                            tmpDistance = Number(distanceData.distance) * 1000 ;
 
-                        if (tmpDistance > 0) {
+                        if (tmpDistance < 500 ) {
 
                             let data = {
+                            	h_photo : result[i].h_photo ,
                                 h_name: result[i].h_name,
+                                h_address : result[i].h_address ,
                                 h_longitude: result[i].h_longitude,
                                 h_latitude: result[i].h_latitude,
+                                h_phoneNumber : result[i].h_phoneNumber ,
                                 distance: Number(distanceData.distance),
                                 distanceUnit: distanceData.unit
                             }
@@ -202,7 +212,8 @@ router.get('/', function(req, res) {
                     }
 
                     hotelList.sort(function(a, b) {
-                        let tmpA, tmpB;
+                        var tmpA = a.distance;
+                        var tmpB = b.distance;
 
                         if (a.distanceUnit === 'Km')
                             tmpA = a.distance * 1000;
@@ -210,7 +221,7 @@ router.get('/', function(req, res) {
                         if (b.distanceUnit === 'Km')
                             tmpB = b.distance * 1000;
 
-                        return tmpA > tmpB
+                        return ( tmpA >= tmpB )? 1 : -1 ;
                     });
                     connection.release();
                     callback(null, surfShopList, restaurantList, hotelList);
