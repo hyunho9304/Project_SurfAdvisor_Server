@@ -8,235 +8,232 @@
 
 const express = require('express');
 const router = express.Router();
-const pool = require( '../../config/dbPool' ) ;
+const pool = require('../../config/dbPool');
 const distance = require('../../modules/distance');
-const async = require( 'async' ) ;
-const moment = require( 'moment' ) ;
+const async = require('async');
+const moment = require('moment');
 
-router.get( '/' , function( req , res ) {
+router.get('/', function(req, res) {
 
-	let sa_id = req.query.sa_id ;
+    let sa_id = req.query.sa_id;
 
-	let task = [
+    let task = [
 
-		function( callback ) {
-			pool.getConnection(function(err , connection ) {
-				if(err) {
-					res.status(500).send({
-						status : "fail" ,
-						message : "internal server err"
-					});
-					callback( "getConnection err" );
-				} else {
-					callback( null , connection ) ;
-				}
-			});
-		} ,
+        function(callback) {
+            pool.getConnection(function(err, connection) {
+                if (err) {
+                    res.status(500).send({
+                        status: "fail",
+                        message: "internal server err"
+                    });
+                    callback("getConnection err");
+                } else {
+                    callback(null, connection);
+                }
+            });
+        },
 
-		function( connection , callback ) { 
+        function(connection, callback) {
 
-			let selectCoordinatesQuery = 'SELECT * FROM SurfArea WHERE sa_id = ?' ;
+            let selectCoordinatesQuery = 'SELECT * FROM SurfArea WHERE sa_id = ?';
 
-			connection.query( selectCoordinatesQuery , sa_id , function(err , result) {
-				if( err ) {
-					res.status(500).send({
-						status : "fail" ,
-						message : "internal server err"
-					}) ;
-					connection.release() ;
-					callback( "selectCoordinatesQuery err") ;
-				} else {
-					callback( null , connection , result[0].sa_longitude , result[0].sa_latitude ) ;
-				}
-			}) ;
-		} ,
+            connection.query(selectCoordinatesQuery, sa_id, function(err, result) {
+                if (err) {
+                    res.status(500).send({
+                        status: "fail",
+                        message: "internal server err"
+                    });
+                    connection.release();
+                    callback("selectCoordinatesQuery err");
+                } else {
+                    callback(null, connection, result[0].sa_longitude, result[0].sa_latitude);
+                }
+            });
+        },
 
-		function( connection , longitude , latitude , callback ) {
+        function(connection, longitude, latitude, callback) {
 
-			let selectSearchSurfShopQuery = 'SELECT * FROM SurfShop' ;
+            let selectSearchSurfShopQuery = 'SELECT * FROM SurfShop';
 
-			connection.query( selectSearchSurfShopQuery , function(err , result) {
-				if( err ) {
-					res.status(500).send({
-						status : "fail" ,
-						message : "internal server err"
-					}) ;
-					connection.release() ;
-					callback( "selectSearchSurfShopQuery err") ;
-				} else {
+            connection.query(selectSearchSurfShopQuery, function(err, result) {
+                if (err) {
+                    res.status(500).send({
+                        status: "fail",
+                        message: "internal server err"
+                    });
+                    connection.release();
+                    callback("selectSearchSurfShopQuery err");
+                } else {
 
-					let surfShopList = [] ;
+                    let surfShopList = [];
 
-					for( var i = 0 ; i < result.length ; i++ ) {
+                    for (var i = 0; i < result.length; i++) {
 
-						let distanceData = distance(latitude, longitude, result[i].ss_latitude , result[i].ss_longitude ) ;
+                        let distanceData = distance(latitude, longitude, result[i].ss_latitude, result[i].ss_longitude);
 
-						var tmpDistance = Number(distanceData.distance ) ;
-						if( distanceData.unit === 'Km' )
-							tmpDistance = Number(distanceData.distance ) * 1000 ;
+                        var tmpDistance = Number(distanceData.distance);
+                        if (distanceData.unit === 'Km')
+                            tmpDistance = Number(distanceData.distance) * 1000;
 
-						console.log(tmpDistance);
+                        if (tmpDistance < 500 ) {
 
+                            let data = {
+                                ss_photo: result[i].ss_photo,
+                                ss_name: result[i].ss_name,
+                                ss_site: result[i].ss_site,
+                                ss_introduction: result[i].ss_introduction,
+                                ss_time: result[i].ss_time,
+                                ss_address: result[i].ss_address,
+                                ss_longitude: result[i].ss_longitude,
+                                ss_latitude: result[i].ss_latitude,
+                                ss_phoneNumber: result[i].ss_phoneNumber,
+                                distance: Number(distanceData.distance),
+                                distanceUnit: distanceData.unit
+                            }
+                            surfShopList.push(data);
+                        }
+                    }
 
-						if( tmpDistance < 5000 ) {
+                    surfShopList.sort(function(a, b) {
+                        var tmpA = a.distance;
+                        var tmpB = b.distance;
 
-							let data = {
-								ss_photo : result[i].ss_photo ,
-								ss_name : result[i].ss_name ,
-								ss_site : result[i].ss_site ,
-								ss_introduction : result[i].ss_introduction ,
-								ss_time : result[i].ss_time ,
-								ss_address : result[i].ss_address ,
-								ss_longitude : result[i].ss_longitude ,
-								ss_latitude : result[i].ss_latitude ,
-								ss_phoneNumber : result[i].ss_phoneNumber ,
-								distance : Number( distanceData.distance ) ,
-								distanceUnit : distanceData.unit
-							}
-							surfShopList.push( data ) ;
-						}
-					}
+                        if( a.distanceUnit === 'Km' )
+                        	tmpA = a.distance * 1000 ;
 
-					surfShopList.sort( function( a , b ) {
-						var tmpA = a.distance ;
-						var tmpB = b.distance ;
+                        if( b.distanceUnit === 'Km' )
+                        	tmpB = b.distance * 1000 ;
 
-						if( a.distanceUnit === 'Km' )
-							tmpA = a.distance * 1000 ;
+                        return ( tmpA >= tmpB )? 1 : -1 ;
+                    });
+                    callback(null, connection, longitude, latitude, surfShopList);
+                }
+            });
+        },
 
-						if( b.distanceUnit === 'Km' )
-							tmpB = b.distance * 1000 ;
+        function(connection, longitude, latitude, surfShopList, callback) {
 
-						return tmpA > tmpB
-					});
-					callback( null , connection , longitude , latitude , surfShopList ) ;
-				}
-			}) ;
-		} ,
+            let selectSearchRestaurantQuery = 'SELECT * FROM Restaurant';
 
-		function( connection , longitude , latitude , surfShopList , callback ) {
+            connection.query(selectSearchRestaurantQuery, function(err, result) {
+                if (err) {
+                    res.status(500).send({
+                        status: "fail",
+                        message: "internal server err"
+                    });
+                    connection.release();
+                    callback("selectSearchRestaurantQuery err");
+                } else {
 
-			let selectSearchRestaurantQuery = 'SELECT * FROM Restaurant' ;
+                    let restaurantList = [];
 
-			connection.query( selectSearchRestaurantQuery , function(err , result) {
-				if( err ) {
-					res.status(500).send({
-						status : "fail" ,
-						message : "internal server err"
-					}) ;
-					connection.release() ;
-					callback( "selectSearchRestaurantQuery err") ;
-				} else {
+                    for (var i = 0; i < 0; i++) {
 
-					let restaurantList = [] ;
+                        let distanceData = distance(latitude, longitude, result[i].r_latitude, result[i].r_longitude);
 
-					for( var i = 0 ; i < 0 ; i++ ) {
+                        let tmpDistance;
+                        if (distanceData.unit === 'Km')
+                            tmpDistance = Number(distanceData.distance) * 1000;
 
-						let distanceData = distance(latitude, longitude, result[i].r_latitude , result[i].r_longitude ) ;
+                        if (tmpDistance > 0) {
 
-						let tmpDistance ;
-						if( distanceData.unit === 'Km' )
-							tmpDistance = Number(distanceData.distance ) * 1000 ;
+                            let data = {
+                                r_name: result[i].r_name,
+                                r_longitude: result[i].r_longitude,
+                                r_latitude: result[i].r_latitude,
+                                distance: Number(distanceData.distance),
+                                distanceUnit: distanceData.unit
+                            }
+                            restaurantList.push(data);
+                        }
+                    }
 
-						if( tmpDistance > 0 ) {
+                    restaurantList.sort(function(a, b) {
+                        let tmpA, tmpB;
 
-							let data = {
-								r_name : result[i].r_name ,
-								r_longitude : result[i].r_longitude ,
-								r_latitude : result[i].r_latitude ,
-								distance : Number( distanceData.distance ) ,
-								distanceUnit : distanceData.unit
-							}
-							restaurantList.push( data ) ;
-						}
-					}
+                        if (a.distanceUnit === 'Km')
+                            tmpA = a.distance * 1000;
 
-					restaurantList.sort( function( a , b ) {
-						let tmpA , tmpB ;
+                        if (b.distanceUnit === 'Km')
+                            tmpB = b.distance * 1000;
 
-						if( a.distanceUnit === 'Km' )
-							tmpA = a.distance * 1000 ;
+                        return tmpA > tmpB
+                    });
+                    callback(null, connection, longitude, latitude, surfShopList, restaurantList);
+                }
+            });
+        },
 
-						if( b.distanceUnit === 'Km' )
-							tmpB = b.distance * 1000 ;
+        function(connection, longitude, latitude, surfShopList, restaurantList, callback) {
 
-						return tmpA > tmpB
-					});
-					callback( null , connection , longitude , latitude , surfShopList , restaurantList ) ;
-				}
-			}) ;
-		} ,
+            let selectSearchHotelQuery = 'SELECT * FROM Hotel';
 
-		function( connection , longitude , latitude , surfShopList , restaurantList , callback ) {
+            connection.query(selectSearchHotelQuery, function(err, result) {
+                if (err) {
+                    res.status(500).send({
+                        status: "fail",
+                        message: "internal server err"
+                    });
+                    connection.release();
+                    callback("selectSearchHotelQuery err");
+                } else {
 
-			let selectSearchHotelQuery = 'SELECT * FROM Hotel' ;
+                    let hotelList = [];
 
-			connection.query( selectSearchHotelQuery , function(err , result) {
-				if( err ) {
-					res.status(500).send({
-						status : "fail" ,
-						message : "internal server err"
-					}) ;
-					connection.release() ;
-					callback( "selectSearchHotelQuery err") ;
-				} else {
+                    for (var i = 0; i < 0; i++) {
 
-					let hotelList = [] ;
+                        let distanceData = distance(latitude, longitude, result[i].h_latitude, result[i].h_longitude);
 
-					for( var i = 0 ; i < 0 ; i++ ) {
+                        let tmpDistance;
+                        if (distanceData.unit === 'Km')
+                            tmpDistance = Number(distanceData.distance) * 1000;
 
-						let distanceData = distance(latitude, longitude, result[i].h_latitude , result[i].h_longitude ) ;
+                        if (tmpDistance > 0) {
 
-						let tmpDistance ;
-						if( distanceData.unit === 'Km' )
-							tmpDistance = Number(distanceData.distance ) * 1000 ;
+                            let data = {
+                                h_name: result[i].h_name,
+                                h_longitude: result[i].h_longitude,
+                                h_latitude: result[i].h_latitude,
+                                distance: Number(distanceData.distance),
+                                distanceUnit: distanceData.unit
+                            }
+                            hotelList.push(data);
+                        }
+                    }
 
-						if( tmpDistance > 0 ) {
+                    hotelList.sort(function(a, b) {
+                        let tmpA, tmpB;
 
-							let data = {
-								h_name : result[i].h_name ,
-								h_longitude : result[i].h_longitude ,
-								h_latitude : result[i].h_latitude ,
-								distance : Number( distanceData.distance ) ,
-								distanceUnit : distanceData.unit
-							}
-							hotelList.push( data ) ;
-						}
-					}
+                        if (a.distanceUnit === 'Km')
+                            tmpA = a.distance * 1000;
 
-					hotelList.sort( function( a , b ) {
-						let tmpA , tmpB ;
+                        if (b.distanceUnit === 'Km')
+                            tmpB = b.distance * 1000;
 
-						if( a.distanceUnit === 'Km' )
-							tmpA = a.distance * 1000 ;
+                        return tmpA > tmpB
+                    });
+                    connection.release();
+                    callback(null, surfShopList, restaurantList, hotelList);
+                }
+            });
+        },
 
-						if( b.distanceUnit === 'Km' )
-							tmpB = b.distance * 1000 ;
+        function(surfShopList, restaurantList, hotelList, callback) {
 
-						return tmpA > tmpB
-					});
-					connection.release() ;
-					callback( null , surfShopList , restaurantList , hotelList ) ;
-				}
-			}) ;
-		} ,
+            res.status(200).send({
+                status: "success",
+                data: {
+                    surfShopList: surfShopList,
+                    restaurantList: restaurantList,
+                    hotelList: hotelList
+                },
+                message: "successful get surfAreaInfo"
+            });
+            callback(null, "successful get surfAreaInfo");
+        }
+    ];
 
-		function( surfShopList , restaurantList , hotelList , callback ) {
-
-			res.status(200).send({
-				status : "success" ,
-				data : {
-					surfShopList : surfShopList ,
-					restaurantList : restaurantList ,
-					hotelList : hotelList
-				} ,
-				message : "successful get surfAreaInfo"
-			}) ;
-			callback( null , "successful get surfAreaInfo" ) ;
-		}
-	] ;
-
-	async.waterfall(task, function(err, result) {
+    async.waterfall(task, function(err, result) {
 
         let logtime = moment().format('MMMM Do YYYY, h:mm:ss a');
 
@@ -245,19 +242,6 @@ router.get( '/' , function( req , res ) {
         else
             console.log(' [ ' + logtime + ' ] ' + result);
     }); //async.waterfall
-}) ;
+});
 
 module.exports = router;
-
-
-
-
-
-
-
-
-
-
-
-
-
