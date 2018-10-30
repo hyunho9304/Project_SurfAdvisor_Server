@@ -71,11 +71,14 @@ router.get( '/' , function( req , res ) {
 
 						let distanceData = distance(latitude, longitude, result[i].ss_latitude , result[i].ss_longitude ) ;
 
-						let tmpDistance ;
+						var tmpDistance = Number(distanceData.distance ) ;
 						if( distanceData.unit === 'Km' )
 							tmpDistance = Number(distanceData.distance ) * 1000 ;
 
-						if( tmpDistance > 0 ) {
+						console.log(tmpDistance);
+
+
+						if( tmpDistance < 5000 ) {
 
 							let data = {
 								ss_photo : result[i].ss_photo ,
@@ -95,7 +98,8 @@ router.get( '/' , function( req , res ) {
 					}
 
 					surfShopList.sort( function( a , b ) {
-						let tmpA , tmpB ;
+						var tmpA = a.distance ;
+						var tmpB = b.distance ;
 
 						if( a.distanceUnit === 'Km' )
 							tmpA = a.distance * 1000 ;
@@ -126,7 +130,7 @@ router.get( '/' , function( req , res ) {
 
 					let restaurantList = [] ;
 
-					for( var i = 0 ; i < result.length ; i++ ) {
+					for( var i = 0 ; i < 0 ; i++ ) {
 
 						let distanceData = distance(latitude, longitude, result[i].r_latitude , result[i].r_longitude ) ;
 
@@ -179,7 +183,7 @@ router.get( '/' , function( req , res ) {
 
 					let hotelList = [] ;
 
-					for( var i = 0 ; i < result.length ; i++ ) {
+					for( var i = 0 ; i < 0 ; i++ ) {
 
 						let distanceData = distance(latitude, longitude, result[i].h_latitude , result[i].h_longitude ) ;
 
