@@ -1,3 +1,7 @@
+/*
+  Description : 거리 측정 모듈
+*/
+
 module.exports = function(lat1, lon1, lat2, lon2) {
 
   let radlat1 = Math.PI * lat1 / 180
