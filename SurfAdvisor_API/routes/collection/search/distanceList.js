@@ -84,15 +84,16 @@ router.get( '/' , function( req , res ) {
 					}
 
 					list.sort( function( a , b ) {
-						let tmpA , tmpB ;
-
+						var tmpA = a.distance;
+                        var tmpB = b.distance;
+                        
 						if( a.distanceUnit === 'Km' )
 							tmpA = a.distance * 1000
 
 						if( b.distanceUnit === 'Km' )
 							tmpB = b.distance * 1000
 
-						return tmpA > tmpB
+						return ( tmpA >= tmpB )? 1 : -1 ;
 					});
 					connection.release() ;
 					callback( null , list ) ;
