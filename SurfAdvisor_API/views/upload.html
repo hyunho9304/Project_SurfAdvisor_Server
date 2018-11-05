@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col s12">
+                <form action="#">
+                    <div class="file-field input-field">
+                        <div class="btn">
+                            <span>File</span>
+                            <input type="file" multiple>
+                        </div>
+                        <div class="file-path-wrapper">
+                            <input class="file-path validate" type="text" placeholder="Upload one or more files">
+                        </div>
+                    </div>
+                </form>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+            </div>
+            <div class="col s4">
+                <a id="uploadBtn" class="waves-effect waves-light btn">업로드</a>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+
+const $ = (selector, context = document) => (
+    context.querySelector(selector)
+);
+
+const serializeArray = form => {
+    let field, l, s = [];
+    if (typeof form == 'object' && form.nodeName == 'FORM') {
+        const len = form.elements.length;
+        for (var i = 0; i < len; i++) {
+            field = form.elements[i];
+            if (field.name && !field.disabled && field.type != 'file' && field.type != 'reset' && field.type != 'submit' && field.type != 'button') {
+                if (field.type == 'select-multiple') {
+                    l = form.elements[i].options.length;
+                    for (j = 0; j < l; j++) {
+                        if (field.options[j].selected)
+                            s[s.length] = { name: field.name, value: field.options[j].value };
+                    }
+                } else if ((field.type != 'checkbox' && field.type != 'radio') || field.checked) {
+                    s[s.length] = { name: field.name, value: field.value };
+                }
+            }
+        }
+    }
+    return s;
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    $('#uploadBtn').addEventListener('click', (event) => {
+        let formData = new FormData();
+
+        const fileElem = $('input[type=file]');
+
+        for(let i = 0 ; i < fileElem.files.length ; i++){
+          formData.append(fileElem.name, fileElem.files[i], fileElem.files[i].name);
+        }
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/apiurl', true);
+        xhr.onload = function(progressEvent) {
+            const status = progressEvent.target.status;
+            if (status === 200) {
+                document.location = progressEvent.target.response;
+                alert("Success!");
+            }else {
+                alert("Fail!");
+            }
+        };
+        xhr.send(formData)
+    });
+
+
+});
+</script>
+
+</html>
