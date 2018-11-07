@@ -3,7 +3,6 @@
     Description : 공공데이터( 국문 관광정보 서비스 ) 한국관광공사
     Content-type : x-www-form-urlencoded
     method : GET - query
-    query = /?si_date={선택날짜}&sa_id={선택도시index}
 */
 
 const express = require('express');
@@ -129,10 +128,10 @@ router.post('/', function(req, res) {
                 });
                 res.status(201).send({
                 	status: "success",
-                	message: "successful get"
+                	message: "successful get & DB upload"
             	});
                 connection.release();
-                callback(null, "successful get");
+                callback(null, "successful get & DB upload");
             });
         }
     ];

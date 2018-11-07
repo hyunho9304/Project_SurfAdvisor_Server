@@ -13,4 +13,8 @@ router.use( '/surfShopPhoto' , surfShopPhoto ) ;
 const restaurantPhoto = require( './restaurantPhoto' ) ;
 router.use( '/restaurantPhoto' , restaurantPhoto ) ;
 
+//	photo hotelPhoto upload 관련
+const hotelPhoto = require( './hotelPhoto' ) ;
+router.use( '/hotelPhoto' , hotelPhoto ) ;
+
 module.exports = router;
