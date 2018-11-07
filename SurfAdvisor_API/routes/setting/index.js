@@ -9,5 +9,8 @@ router.use( '/schedule' , schedule ) ;
 const surfShopPhoto = require( './surfShopPhoto' ) ;
 router.use( '/surfShopPhoto' , surfShopPhoto ) ;
 
+//	photo restaurantPhoto upload 관련
+const restaurantPhoto = require( './restaurantPhoto' ) ;
+router.use( '/restaurantPhoto' , restaurantPhoto ) ;
 
 module.exports = router;
