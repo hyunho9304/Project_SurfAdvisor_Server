@@ -1,6 +1,6 @@
 /*
-    URL : /setting/surfShopPhoto
-    Description : 서핑샵 사진데이터 업로드
+    URL : /setting/restaurantPhoto
+    Description : 식당 사진데이터 업로드
     Content-type : x-www-form-urlencoded
     method : POST - query
 */
@@ -58,25 +58,25 @@ router.post('/', upload.array('photo', 10000), function(req, res) {
 
             for (var i = 0; i < req.files.length; i++) {
 
-                let updateSurfShopPhotoQuery = 'UPDATE SurfShop SET ss_photo = ? WHERE ss_id = ?';
+                let updateRestaurantPhotoQuery = 'UPDATE Restaurant SET r_photo = ? WHERE r_id = ?';
                 let queryArr = [photoList[i], photoNameList[i]];
 
-                connection.query(updateSurfShopPhotoQuery, queryArr, function(err, result) {
+                connection.query(updateRestaurantPhotoQuery, queryArr, function(err, result) {
                     if (err) {
                         res.status(500).send({
                             status: "fail",
                             msg: "internal server err"
                         });
-                        callback("updateSurfShopPhotoQuery err");
+                        callback("updateRestaurantPhotoQuery err");
                     }
                 });
             }
             res.status(201).send({
                 status: "success",
-                message: "successful updateSurfShopPhotoQuery"
+                message: "successful updateRestaurantPhotoQuery"
             });
             connection.release();
-            callback(null, "successful updateSurfShopPhotoQuery");
+            callback(null, "successful updateRestaurantPhotoQuery");
         }
     ];
 
