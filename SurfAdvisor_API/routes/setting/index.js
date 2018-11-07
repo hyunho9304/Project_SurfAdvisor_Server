@@ -5,9 +5,9 @@ var router = express.Router();
 const schedule = require( './schedule' ) ;
 router.use( '/schedule' , schedule ) ;
 
-//	photo upload 관련
-const photo = require( './photo' ) ;
-router.use( '/photo' , photo ) ;
+//	photo surfShopPhoto upload 관련
+const surfShopPhoto = require( './surfShopPhoto' ) ;
+router.use( '/surfShopPhoto' , surfShopPhoto ) ;
 
 
 module.exports = router;

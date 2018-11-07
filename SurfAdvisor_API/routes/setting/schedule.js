@@ -1,3 +1,11 @@
+/*
+    URL : /setting/schedule
+    Description : 공공데이터( 국문 관광정보 서비스 ) 한국관광공사
+    Content-type : x-www-form-urlencoded
+    method : GET - query
+    query = /?si_date={선택날짜}&sa_id={선택도시index}
+*/
+
 const express = require('express');
 const router = express.Router();
 const pool = require( '../../config/dbPool' ) ;
