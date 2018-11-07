@@ -10,24 +10,9 @@ const pool = require('../../config/dbPool');
 const async = require('async');
 const moment = require('moment');
 
-const multer = require('multer');
-const multerS3 = require('multer-s3');
-const aws = require('aws-sdk');
-aws.config.loadFromPath('../config/aws_config.json');
-const s3 = new aws.S3();
+const upload = require( '../../modules/AWS-S3') ;
 
-const upload = multer({
-    storage: multerS3({
-        s3: s3,
-        bucket: 'hyunho9304',
-        acl: 'public-read',
-        key: function(req, file, callback) {
-            callback(null, Date.now() + '.' + file.originalname.split('.').pop());
-        }
-    })
-});
-
-router.post('/', upload.array('photo', 10000), function(req, res) {
+router.put('/', upload.array('photo', 10000), function(req, res) {
 
     var photoNameList = [];
     var photoList = [];
