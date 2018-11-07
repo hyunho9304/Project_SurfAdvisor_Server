@@ -75,7 +75,7 @@ router.get('/', function(req, res) {
                         if (distanceData.unit === 'Km')
                             tmpDistance = Number(distanceData.distance) * 1000 ;
 
-                        if (tmpDistance < 5000 ) {
+                        if (tmpDistance <= 5000 ) {
 
                             let data = {
                             	ss_photo: result[i].ss_photo,
@@ -106,17 +106,6 @@ router.get('/', function(req, res) {
 
                         return ( tmpA >= tmpB )? 1 : -1 ;
                     });
-
-                    // console.log("hi");
-                    // console.log( surfShopList.length );
-
-                    // var fifteenSurfShopList = [] ;
-                    // for( var i = 0 ; i < 15 ; i++ )
-                    // 	fifteenSurfShopList.push( surfShopList[i] ) ;
-
-                    // console.log("hi");
-                    // console.log( fifteenSurfShopList.length );
-
                     callback(null, connection, longitude, latitude, surfShopList );
                 }
             });
@@ -139,14 +128,14 @@ router.get('/', function(req, res) {
                     let restaurantList = [];
 
                     for (var i = 0; i < result.length ; i++) {
-
+                        
                         let distanceData = distance(latitude, longitude, result[i].r_latitude, result[i].r_longitude);
 
                         var tmpDistance = Number(distanceData.distance) ;
                         if (distanceData.unit === 'Km')
                             tmpDistance = Number(distanceData.distance) * 1000 ;
 
-                        if (tmpDistance < 5000 ) {
+                        if (tmpDistance <= 5000 ) {
 
                             let data = {
                             	r_photo : result[i].r_photo ,
@@ -206,7 +195,7 @@ router.get('/', function(req, res) {
                         if (distanceData.unit === 'Km')
                             tmpDistance = Number(distanceData.distance) * 1000 ;
 
-                        if (tmpDistance < 5000 ) {
+                        if (tmpDistance <= 5000 ) {
 
                             let data = {
                             	h_photo : result[i].h_photo ,
