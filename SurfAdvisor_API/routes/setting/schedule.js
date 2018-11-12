@@ -54,11 +54,10 @@ router.post('/', function(req, res) {
                 url: url + queryParams,
                 method: 'GET'
             }, function(error, response, body) {
-                // console.log('Status', response.statusCode);
-                // console.log();
-                // console.log('Headers', JSON.stringify(response.headers));
-                // console.log();
-                // console.log('Reponse received', body );
+                console.log('Status', response.statusCode);
+                console.log('Headers', JSON.stringify(response.headers));
+                console.log('Reponse received', body );
+                
                 fs.writeFile(__dirname + "/hotel.xml", body, 'utf8', function(err) {
                     if (err) 
                     	console.log("error : " + err);
