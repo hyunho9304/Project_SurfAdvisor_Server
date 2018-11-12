@@ -111,19 +111,19 @@ router.post('/', function(req, res) {
                     			continue ;
                     	}
 
-                 		let insertHotelQuery = 'INSERT INTO Hotel VALUES( ? , ? , ? , ? , ? , ? , ? )' ;
-						let queryArr = [ null , title , phoneNumber , address , longitude , latitude , photo ] ;
+      //            		let insertHotelQuery = 'INSERT INTO Hotel VALUES( ? , ? , ? , ? , ? , ? , ? )' ;
+						// let queryArr = [ null , title , phoneNumber , address , longitude , latitude , photo ] ;
 
-						connection.query( insertHotelQuery , queryArr , function( err , result ) {
-							if(err) {
-								res.status(500).send({
-									status : "fail" ,
-									message : "internal server err"
-								}) ;
-								connection.release() ;
-								callback( "insertHotelQuery err") ;
-							}
-						}) ;
+						// connection.query( insertHotelQuery , queryArr , function( err , result ) {
+						// 	if(err) {
+						// 		res.status(500).send({
+						// 			status : "fail" ,
+						// 			message : "internal server err"
+						// 		}) ;
+						// 		connection.release() ;
+						// 		callback( "insertHotelQuery err") ;
+						// 	}
+						// }) ;
                     }
                 });
                 res.status(201).send({
