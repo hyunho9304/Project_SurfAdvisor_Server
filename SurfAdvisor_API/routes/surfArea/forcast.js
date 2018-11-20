@@ -9,6 +9,8 @@
 const express = require('express');
 const router = express.Router();
 const pool = require( '../../config/dbPool' ) ;
+const gradeToStar = require( '../../modules/gradeToStar' ) ;
+const gradeToComment = require( '../../modules/gradeToComment' ) ;
 const async = require( 'async' ) ;
 const moment = require( 'moment' ) ;
 
@@ -16,6 +18,9 @@ router.get( '/' , function( req , res ) {
 
 	let si_date = req.query.si_date ;
 	let sa_id = req.query.sa_id ;
+
+	let splitDate = si_date.split('.') ;
+	let month = splitDate[1] ;
 
 	let task = [
 
@@ -53,8 +58,28 @@ router.get( '/' , function( req , res ) {
 
 		function( connection , object , callback ) {
 
+			let selectTemperatureQuery = 'SELECT wt_grade FROM WaterTemperature WHERE sa_id = ? AND wt_month = ?' ;
+			let queryArr = [ sa_id , month ] ;
+
+			connection.query( selectTemperatureQuery , queryArr , function(err , result) {
+				if( err ) {
+					res.status(500).send({
+						status : "fail" ,
+						message : "internal server err"
+					}) ;
+					connection.release() ;
+					callback( "selectTemperatureQuery err") ;
+				} else {
+					callback( null , connection , object , result[0].wt_grade ) ;
+				}
+			}) ;
+		} ,
+
+		function( connection , object , wt_grade , callback ) {
+
 			let selectDetailForcastQuery = 'SELECT * FROM SurfInfoDetail WHERE sa_id = ? AND sid_date = ? ORDER BY sid_time ASC' ;
 			let queryArr = [ sa_id , si_date ] ;
+
 			connection.query( selectDetailForcastQuery , queryArr , function(err , result) {
 				if( err ) {
 					res.status(500).send({
@@ -72,28 +97,28 @@ router.get( '/' , function( req , res ) {
 						let data = {
 							sid_time : result[i].sid_time ,
 							sid_wave : result[i].sid_wave ,
-							sid_wind : result[i].sid_wind ,
-							sid_grade : result[i].sid_grade
+							sid_gradeStar : gradeToStar( result[i].sid_grade )
 						}
 						list.push( data ) ;
 					}
 					connection.release() ;
-					callback( null , object , list ) ;
+					callback( null , object , wt_grade , list ) ;
 				}
 			}) ;
 		} ,
 
-		function( object , list , callback ) {
-
+		function( object , wt_grade , list , callback ) {
+			
 			res.status(200).send({
 				status : "success" ,
 				data : {
 					sa_name : object.sa_name ,
-					si_grade : object.si_grade ,
-					si_temperature : object.si_temperature ,
-					si_maxTemperature : object.si_maxTemperature ,
+					si_gradeStar : gradeToStar( object.si_grade ) , 
 					si_wave : object.si_wave ,
 					si_wind : object.si_wind ,
+					si_riding : object.si_riding ,
+					si_wear : wt_grade ,
+					si_gradeComment : gradeToComment( object.si_grade ) ,
 					forcast : list
 				} ,
 				message : "successful get surfAreaForcast"

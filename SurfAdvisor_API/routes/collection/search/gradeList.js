@@ -72,13 +72,12 @@ router.get( '/' , function( req , res ) {
 					for( var i = 0 ; i < result.length ; i++ ) {
 
 						let distanceData = distance(latitude, longitude, result[i].sa_latitude , result[i].sa_longitude ) ;
-						let gradeStar = gradeToStar( result[i].si_grade ) ;
-
+						
 						let data = {
 
 							sa_id : result[i].sa_id ,
 							sa_name : result[i].sa_name ,
-							si_gradeStar : gradeStar ,
+							si_gradeStar : gradeToStar( result[i].si_grade ) ,
 							distance : Number( distanceData.distance ) ,
 							distanceUnit : distanceData.unit
 						}
