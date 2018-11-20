@@ -9,7 +9,8 @@
 const express = require('express');
 const router = express.Router();
 const pool = require( '../../../config/dbPool' ) ;	//	경로하나하나
-const distance = require('../../../modules/distance');
+const distance = require('../../../modules/distance' );
+const gradeToStar = require( '../../../modules/gradeToStar' ) ;
 const async = require( 'async' ) ;
 const moment = require( 'moment' ) ;
 
@@ -71,12 +72,13 @@ router.get( '/' , function( req , res ) {
 					for( var i = 0 ; i < result.length ; i++ ) {
 
 						let distanceData = distance(latitude, longitude, result[i].sa_latitude , result[i].sa_longitude ) ;
+						let gradeStar = gradeToStar( result[i].si_grade ) ;
 
 						let data = {
 
 							sa_id : result[i].sa_id ,
 							sa_name : result[i].sa_name ,
-							si_grade : result[i].si_grade ,
+							si_gradeStar : gradeStar ,
 							distance : Number( distanceData.distance ) ,
 							distanceUnit : distanceData.unit
 						}

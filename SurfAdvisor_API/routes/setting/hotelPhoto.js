@@ -46,6 +46,10 @@ router.put('/', upload.array('photo', 10000), function(req, res) {
                 let updateHotelPhotoPhotoQuery = 'UPDATE Hotel SET h_photo = ? WHERE h_id = ?';
                 let queryArr = [photoList[i], photoNameList[i]];
 
+                // console.log( i );
+                // console.log( photoList[i] ) ;
+                // console.log( photoNameList[i] ) ;;
+
                 connection.query(updateHotelPhotoPhotoQuery, queryArr, function(err, result) {
                     if (err) {
                         res.status(500).send({
