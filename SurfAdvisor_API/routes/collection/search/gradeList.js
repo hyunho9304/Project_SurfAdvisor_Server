@@ -18,6 +18,8 @@ router.get( '/' , function( req , res ) {
 
 	let si_date = req.query.si_date ;
 	let c_name = req.query.c_name ;
+	let longitude = req.query.longitude;
+    let latitude = req.query.latitude;
 
 	let task = [
 
@@ -36,21 +38,28 @@ router.get( '/' , function( req , res ) {
 		} ,
 
 		function( connection , callback ) { 
+			
+			if ( longitude == "" || longitude == undefined ) { //	네임으로 할때 
 
-			let selectCoordinatesQuery = 'SELECT * FROM City WHERE c_name = ?' ;
+                let selectCoordinatesQuery = 'SELECT * FROM City WHERE c_name = ?';
 
-			connection.query( selectCoordinatesQuery , c_name , function(err , result) {
-				if( err ) {
-					res.status(500).send({
-						status : "fail" ,
-						message : "internal server err"
-					}) ;
-					connection.release() ;
-					callback( "selectCoordinatesQuery err") ;
-				} else {
-					callback( null , connection , result[0].c_longitude , result[0].c_latitude ) ;
-				}
-			}) ;
+                connection.query(selectCoordinatesQuery, c_name, function(err, result) {
+                    if (err) {
+                        res.status(500).send({
+                            status: "fail",
+                            message: "internal server err"
+                        });
+                        connection.release();
+                        callback("selectCoordinatesQuery err");
+                    } else {
+                    	console.log("use city name");
+                        callback(null, connection, result[0].c_longitude, result[0].c_latitude);
+                    }
+                });
+            } else {
+            	console.log("use longitude & latitude");
+            	callback( null , connection , longitude , latitude ) ;
+            }
 		} ,
 
 		function( connection , longitude , latitude , callback ) {
@@ -72,7 +81,7 @@ router.get( '/' , function( req , res ) {
 					for( var i = 0 ; i < result.length ; i++ ) {
 
 						let distanceData = distance(latitude, longitude, result[i].sa_latitude , result[i].sa_longitude ) ;
-						
+
 						let data = {
 
 							sa_id : result[i].sa_id ,

@@ -8,123 +8,121 @@
 
 const express = require('express');
 const router = express.Router();
-const pool = require( '../../../config/dbPool' ) ;	//	경로하나하나
-const distance = require('../../../modules/distance' );
-const gradeToStar = require( '../../../modules/gradeToStar' ) ;
-const async = require( 'async' ) ;
-const moment = require( 'moment' ) ;
+const pool = require('../../../config/dbPool'); //	경로하나하나
+const distance = require('../../../modules/distance');
+const gradeToStar = require('../../../modules/gradeToStar');
+const async = require('async');
+const moment = require('moment');
 
-router.get( '/' , function( req , res ) {
+router.get('/', function(req, res) {
 
-	let si_date = req.query.si_date ;
-	let c_name = req.query.c_name ;
-	let longitude = req.query.longitude ;
-	let latitude = req.query.latitude ;
+    let si_date = req.query.si_date;
+    let c_name = req.query.c_name;
+    let longitude = req.query.longitude;
+    let latitude = req.query.latitude;
 
-	let task = [
+    let task = [
 
-		function( callback ) {
-			pool.getConnection(function(err , connection ) {
-				if(err) {
-					res.status(500).send({
-						status : "fail" ,
-						message : "internal server err"
-					});
-					callback( "getConnection err" );
-				} else {
-					callback( null , connection ) ;
-				}
-			});
-		} ,
+        function(callback) {
+            pool.getConnection(function(err, connection) {
+                if (err) {
+                    res.status(500).send({
+                        status: "fail",
+                        message: "internal server err"
+                    });
+                    callback("getConnection err");
+                } else {
+                    callback(null, connection);
+                }
+            });
+        },
 
-		function( connection , callback ) {
+        function(connection, callback) {
 
-			if( longitude == "" || longitude == undefined  ) {	//	네임으로 할때 
-				
-				console.log("a " + longitude);
+            if ( longitude == "" || longitude == undefined ) { //	네임으로 할때 
 
-			} else {
-				
-				console.log("b " + longitude);
-			}
+                let selectCoordinatesQuery = 'SELECT * FROM City WHERE c_name = ?';
 
-			let selectCoordinatesQuery = 'SELECT * FROM City WHERE c_name = ?' ;
+                connection.query(selectCoordinatesQuery, c_name, function(err, result) {
+                    if (err) {
+                        res.status(500).send({
+                            status: "fail",
+                            message: "internal server err"
+                        });
+                        connection.release();
+                        callback("selectCoordinatesQuery err");
+                    } else {
+                    	console.log("use city name");
+                        callback(null, connection, result[0].c_longitude, result[0].c_latitude);
+                    }
+                });
+            } else {
+            	console.log("use longitude & latitude");
+            	callback( null , connection , longitude , latitude ) ;
+            }
+        },
 
-			connection.query( selectCoordinatesQuery , c_name , function(err , result) {
-				if( err ) {
-					res.status(500).send({
-						status : "fail" ,
-						message : "internal server err"
-					}) ;
-					connection.release() ;
-					callback( "selectCoordinatesQuery err") ;
-				} else {
-					callback( null , connection , result[0].c_longitude , result[0].c_latitude ) ;
-				}
-			}) ;
-		} ,
+        function(connection, longitude, latitude, callback) {
 
-		function( connection , longitude , latitude , callback ) {
+            let selectSearchDistanceQuery = 'SELECT * FROM SurfArea SA , SurfInfo SI WHERE SA.sa_id = SI.sa_id AND SI.si_date = ?';
 
-			let selectSearchDistanceQuery = 'SELECT * FROM SurfArea SA , SurfInfo SI WHERE SA.sa_id = SI.sa_id AND SI.si_date = ?' ;
+            connection.query(selectSearchDistanceQuery, si_date, function(err, result) {
+                if (err) {
+                    res.status(500).send({
+                        status: "fail",
+                        message: "internal server err"
+                    });
+                    connection.release();
+                    callback("selectSearchDistanceQuery err");
+                } else {
 
-			connection.query( selectSearchDistanceQuery , si_date , function(err , result) {
-				if( err ) {
-					res.status(500).send({
-						status : "fail" ,
-						message : "internal server err"
-					}) ;
-					connection.release() ;
-					callback( "selectSearchDistanceQuery err") ;
-				} else {
+                    let list = [];
 
-					let list = [] ;
+                    for (var i = 0; i < result.length; i++) {
 
-					for( var i = 0 ; i < result.length ; i++ ) {
+                        let distanceData = distance(latitude, longitude, result[i].sa_latitude, result[i].sa_longitude);
 
-						let distanceData = distance(latitude, longitude, result[i].sa_latitude , result[i].sa_longitude ) ;
+                        let data = {
 
-						let data = {
+                            sa_id: result[i].sa_id,
+                            sa_name: result[i].sa_name,
+                            si_gradeStar: gradeToStar(result[i].si_grade),
+                            distance: Number(distanceData.distance),
+                            distanceUnit: distanceData.unit
+                        }
+                        list.push(data);
+                    }
 
-							sa_id : result[i].sa_id ,
-							sa_name : result[i].sa_name ,
-							si_gradeStar : gradeToStar( result[i].si_grade ) ,
-							distance : Number( distanceData.distance ) ,
-							distanceUnit : distanceData.unit
-						}
-						list.push( data ) ;
-					}
-
-					list.sort( function( a , b ) {
-						var tmpA = a.distance;
+                    list.sort(function(a, b) {
+                        var tmpA = a.distance;
                         var tmpB = b.distance;
-                        
-						if( a.distanceUnit === 'Km' )
-							tmpA = a.distance * 1000
 
-						if( b.distanceUnit === 'Km' )
-							tmpB = b.distance * 1000
+                        if (a.distanceUnit === 'Km')
+                            tmpA = a.distance * 1000
 
-						return ( tmpA >= tmpB )? 1 : -1 ;
-					});
-					connection.release() ;
-					callback( null , list ) ;
-				}
-			}) ;
-		} ,
+                        if (b.distanceUnit === 'Km')
+                            tmpB = b.distance * 1000
 
-		function( list , callback ) {
+                        return (tmpA >= tmpB) ? 1 : -1;
+                    });
+                    connection.release();
+                    callback(null, list);
+                }
+            });
+        },
 
-			res.status(200).send({
-				status : "success" ,
-				data : list ,
-				message : "successful get SearchDistanceList"
-			}) ;
-			callback( null , "successful get SearchDistanceList" ) ;
-		}
-	] ;
+        function(list, callback) {
 
-	async.waterfall(task, function(err, result) {
+            res.status(200).send({
+                status: "success",
+                data: list,
+                message: "successful get SearchDistanceList"
+            });
+            callback(null, "successful get SearchDistanceList");
+        }
+    ];
+
+    async.waterfall(task, function(err, result) {
 
         let logtime = moment().format('MMMM Do YYYY, h:mm:ss a');
 
@@ -133,19 +131,6 @@ router.get( '/' , function( req , res ) {
         else
             console.log(' [ ' + logtime + ' ] ' + result);
     }); //async.waterfall
-}) ;
+});
 
 module.exports = router;
-
-
-
-
-
-
-
-
-
-
-
-
-
