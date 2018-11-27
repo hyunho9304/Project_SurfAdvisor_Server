@@ -18,6 +18,8 @@ router.get( '/' , function( req , res ) {
 
 	let si_date = req.query.si_date ;
 	let c_name = req.query.c_name ;
+	let longitude = req.query.longitude ;
+	let latitude = req.query.latitude ;
 
 	let task = [
 
@@ -35,7 +37,16 @@ router.get( '/' , function( req , res ) {
 			});
 		} ,
 
-		function( connection , callback ) { 
+		function( connection , callback ) {
+
+			if( longitude == "" || longitude == undefined  ) {	//	네임으로 할때 
+				
+				console.log("a " + longitude);
+
+			} else {
+				
+				console.log("b " + longitude);
+			}
 
 			let selectCoordinatesQuery = 'SELECT * FROM City WHERE c_name = ?' ;
 
@@ -72,7 +83,7 @@ router.get( '/' , function( req , res ) {
 					for( var i = 0 ; i < result.length ; i++ ) {
 
 						let distanceData = distance(latitude, longitude, result[i].sa_latitude , result[i].sa_longitude ) ;
-						
+
 						let data = {
 
 							sa_id : result[i].sa_id ,
