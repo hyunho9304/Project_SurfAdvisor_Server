@@ -4,6 +4,9 @@
 	Content-type : x-www-form-urlencoded
 	method : GET - query
 	query = /?si_date={선택날짜}&name={선택도시이름}
+
+	si_date , c_name 의 방법으로 데이터있는 지역에 대한 접근
+    si_date , longitude , latitude 로 위도경도를 보내 확인하는 방법
 */
 
 const express = require('express');
