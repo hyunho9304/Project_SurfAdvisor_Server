@@ -1,4 +1,4 @@
-# 2018 스마트 관광 앱개발 공모전( SurfAdvisor )
+# 2018 스마트 관광 앱개발 공모전 우수상 수상작( SurfAdvisor )
 
 ## 1 ) "SurfAdvisor" 프로젝트( Server )
 
