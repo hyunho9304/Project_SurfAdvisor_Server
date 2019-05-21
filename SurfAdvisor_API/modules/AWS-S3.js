@@ -10,7 +10,7 @@ const s3 = new aws.S3();
 module.exports = multer({
     storage: multerS3({
         s3: s3,
-        bucket: 'hyunho9304',
+        bucket: 'advisorsurf',
         acl: 'public-read',
         key: function(req, file, callback) {
             callback(null, Date.now() + '.' + file.originalname.split('.').pop());
