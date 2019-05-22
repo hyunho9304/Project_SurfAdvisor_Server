@@ -50,7 +50,6 @@ router.get( '/' , function( req , res ) {
 					connection.release() ;
 					callback( "selectTemperatureQuery err") ;
 				} else {
-					console.log( result );
 					callback( null , connection , result ) ;
 				}
 			}) ;
@@ -90,16 +89,47 @@ router.get( '/' , function( req , res ) {
 					callback( "selectDetailForcastQuery err") ;
 				} else {
 
+					let timeData = [ 6 , 9 , 12 , 15 , 18 ] ;
 					let list = [] ;
 
 					for( var i = 0 ; i < object.length ; i++ ) {
 
+						let waveData = [] ;
+						let maxWaveTime = -1 ;
+						let maxWave = -1 ;
+						var cnt = 0 ;
+
 						for( var j = 0 ; j < result.length ; j++ ) {
 
+							if( object[i].sa_name == result[j].sa_name ) {
 
+								if( result[j].sid_time === timeData[0] || result[j].sid_time == timeData[1] || result[j].sid_time == timeData[2] || result[j].sid_time == timeData[3] || result[j].sid_time == timeData[4] ) {
+									cnt++ ;
+									waveData.push( result[j].sid_wave ) ;
+
+									if( maxWave < result[j].sid_wave ) {
+										maxWaveTime = result[j].sid_time ;
+										maxWave = result[j].sid_wave ;
+									}
+								}
+							}
+
+							if( cnt == 5 ) {
+								cnt = 0 ;
+								console.log( waveData );
+								break ;
+							}
 						}
 
-						let indata = {
+						let inData1 = {
+
+							sa_name : object[i].sa_name ,
+							sa_latitude : object[i].sa_latitude ,
+							sa_longitude : object[i].sa_longitude ,
+							si_gradeComment : gradeToComment( object[i].si_grade )
+						}
+
+						let inData2 = {
 
 							si_wave : object[i].si_wave ,
 							si_wind : object[i].si_wind ,
@@ -107,13 +137,22 @@ router.get( '/' , function( req , res ) {
 							si_wear : wearList[i].wt_grade
 						}
 
+						let inData3 = {
+
+							maxWaveTime : maxWaveTime ,
+							maxWave : maxWave ,
+							six : waveData[0] ,
+							nine : waveData[1] ,
+							twelve : waveData[2] ,
+							fifteen : waveData[3] ,
+							eighteen : waveData[4]
+						}
+
 						let data = {
 
-							sa_name : object[i].sa_name ,
-							sa_latitude : object[i].sa_latitude ,
-							sa_longitude : object[i].sa_longitude ,
-							si_gradeComment : gradeToComment( object[i].si_grade ) ,
-							detailData : indata
+							basicData : inData1 ,
+							detailData : inData2 ,
+							waveData : inData3
 						}
 
 						list.push( data ) ;
