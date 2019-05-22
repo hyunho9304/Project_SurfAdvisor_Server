@@ -10,7 +10,6 @@ const express = require('express');
 const router = express.Router();
 const pool = require( '../../config/dbPool' ) ;
 const distance = require('../../modules/distance' );
-const gradeToStar = require( '../../modules/gradeToStar' ) ;
 const gradeToComment = require( '../../modules/gradeToComment' ) ;
 const async = require( 'async' ) ;
 const moment = require( 'moment' ) ;
@@ -40,6 +39,26 @@ router.get( '/' , function( req , res ) {
 
 		function( connection , callback ) {
 
+			let selectTemperatureQuery = 'SELECT * FROM WaterTemperature WT , SurfArea SA WHERE SA.sa_id = WT.sa_id AND wt_month = ? ORDER BY if(ASCII(SUBSTRING(SA.sa_name , 1)) < 128, 9, 1) ASC , SA.sa_name ASC' ;
+
+			connection.query( selectTemperatureQuery , month , function(err , result) {
+				if( err ) {
+					res.status(500).send({
+						status : "fail" ,
+						message : "internal server err"
+					}) ;
+					connection.release() ;
+					callback( "selectTemperatureQuery err") ;
+				} else {
+					console.log( result );
+					callback( null , connection , result ) ;
+				}
+			}) ;
+
+		} ,
+
+		function( connection , wearList , callback ) {
+
 			let selectSearchGradeQuery = 'SELECT * FROM SurfArea SA , SurfInfo SI WHERE SA.sa_id = SI.sa_id AND SI.si_date = ? ORDER BY if(ASCII(SUBSTRING(SA.sa_name , 1)) < 128, 9, 1) ASC , SA.sa_name ASC' ;
 
 			connection.query( selectSearchGradeQuery , si_date , function(err , result) {
@@ -51,28 +70,12 @@ router.get( '/' , function( req , res ) {
 					connection.release() ;
 					callback( "selectSearchGradeQuery err") ;
 				} else {
-
-					console.log( result );
-
-					let list = [] ;
-
-					for( var i = 0 ; i < result.length ; i++ ) {
-
-						let data = {
-
-							sa_id : result[i].sa_id ,
-							sa_name : result[i].sa_name ,
-							si_gradeStar : gradeToStar( result[i].si_grade ) ,
-						}
-
-						list.push( data ) ;
-					}
-					callback( null , connection , list ) ;
+					callback( null , connection , wearList , result ) ;
 				}
 			}) ;
 		} ,
 
-		function( connection , object , callback ) {
+		function( connection , wearList , object , callback ) {
 
 			let selectDetailForcastQuery = 'SELECT * FROM SurfArea SA , SurfInfoDetail SID WHERE SA.sa_id = SID.sa_id AND sid_date = ? ORDER BY if(ASCII(SUBSTRING(SA.sa_name , 1)) < 128, 9, 1) ASC , SA.sa_name ASC , sid_time ASC' ;
 			let queryArr = [ si_date ] ;
@@ -87,31 +90,45 @@ router.get( '/' , function( req , res ) {
 					callback( "selectDetailForcastQuery err") ;
 				} else {
 
-					console.log("asdfasd==============================================================================");
-					console.log( result );
 					let list = [] ;
 
-					for( var i = 0 ; i < result.length ; i++ ) {
+					for( var i = 0 ; i < object.length ; i++ ) {
+
+						for( var j = 0 ; j < result.length ; j++ ) {
+
+
+						}
+
+						let indata = {
+
+							si_wave : object[i].si_wave ,
+							si_wind : object[i].si_wind ,
+							si_riding : object[i].si_riding ,
+							si_wear : wearList[i].wt_grade
+						}
 
 						let data = {
-							sid_time : result[i].sid_time ,
-							sid_wave : result[i].sid_wave ,
-							sid_gradeStar : gradeToStar( result[i].sid_grade )
+
+							sa_name : object[i].sa_name ,
+							sa_latitude : object[i].sa_latitude ,
+							sa_longitude : object[i].sa_longitude ,
+							si_gradeComment : gradeToComment( object[i].si_grade ) ,
+							detailData : indata
 						}
+
 						list.push( data ) ;
 					}
 					connection.release() ;
-					callback( null , object , list ) ;
+					callback( null , list ) ;
 				}
 			}) ;
 		} ,
 
-		function( object , list , callback ) {
+		function( list , callback ) {
 
 			res.status(200).send({
 				status : "success" ,
-				data : object ,
-				data2 : list ,
+				data : list ,
 				message : "successful get SearchGradeList"
 			}) ;
 			callback( null , "successful get SearchGradeList" ) ;
